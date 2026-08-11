@@ -110,6 +110,13 @@ Follow the prompts — your site goes live at `https://shaam-e-gazal.vercel.app`
 
 ---
 
+## 👤 Creator
+
+Made with 🪔 by **[Shivam Giri](https://github.com/shivam-giri)**
+
+---
+
 ## 📄 License
 
 MIT — free to use, remix, and share. A mehfil is for everyone. 🪔
+

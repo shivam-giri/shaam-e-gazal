@@ -576,3 +576,34 @@ button.active .tl-name { color: var(--amber-soft); }
   .player-card { padding: 10px 12px; gap: 10px; }
   .track-name { font-size: 13px; }
 }
+
+/* ── Creator Footer ──────────────────────────────────────── */
+.creator-footer {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--white-45);
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  /* sits above bg, below player */
+}
+
+.creator-name {
+  font-weight: 600;
+  color: var(--amber-soft);
+  text-decoration: none;
+  pointer-events: auto;
+  transition: color 0.2s, opacity 0.2s;
+}
+.creator-name:hover {
+  color: var(--gold);
+  opacity: 1;
+}

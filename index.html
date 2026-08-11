@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>शाम-ए-ग़ज़ल — Ghazals That Turn the Night Into a Mehfil</title>
-  <meta name="description" content="शाम-ए-ग़ज़ल — An intimate evening of ghazals by Jagjit Singh, Pankaj Udhas, Begum Akhtar, Nusrat Fateh Ali Khan and more. Free, no login, pure nostalgia." />
+  <title>Shaam-e-Gazal - Ghazals That Turn the Night Into a Mehfil</title>
+  <meta name="description" content="Shaam-e-Gazal - An intimate evening of ghazals by Jagjit Singh, Pankaj Udhas, Begum Akhtar, Nusrat Fateh Ali Khan and more. Free, no login, pure nostalgia." />
   <meta name="keywords" content="ghazal, hindi ghazal, jagjit singh, pankaj udhas, begum akhtar, nusrat fateh ali khan, hariharan, talat aziz, chitra singh, shaam e gazal, mehfil" />
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="शाम-ए-ग़ज़ल — Ghazals That Turn the Night Into a Mehfil" />
+  <meta property="og:title" content="Shaam-e-Gazal - Ghazals That Turn the Night Into a Mehfil" />
   <meta property="og:description" content="An intimate evening of ghazals by Jagjit Singh, Pankaj Udhas, Begum Akhtar, Nusrat Fateh Ali Khan and more." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -114,15 +114,27 @@
     </div>
   </div>
 
-  <div id="ytPlayer" style="position:fixed;bottom:0;left:0;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;"></div>
+  <!--
+    ytPlayer: must NOT be display:none (YouTube won't mount).
+    Use a real size hidden off-screen. 200x112 = standard 16:9 minimum.
+  -->
+  <div
+    id="ytPlayer"
+    style="position:fixed;top:-9999px;left:-9999px;width:200px;height:112px;pointer-events:none;"
+    aria-hidden="true"
+  ></div>
 
+  <!-- Creator credit -->
+  <footer class="creator-footer" aria-label="Creator credit">
+    <span>crafted with 🪔 by</span>
+    <a href="https://github.com/shivam-giri" target="_blank" rel="noopener noreferrer" class="creator-name">Shivam Giri</a>
+  </footer>
+  <!-- Load app.js first so onYouTubeIframeAPIReady is defined BEFORE YouTube API fires -->
   <script src="app.js"></script>
-  <script>
-    var tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-  </script>
+  <!-- YouTube API loads last — callback already defined above -->
+  <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
+
+
 
