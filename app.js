@@ -1,6 +1,6 @@
 ﻿/* ============================================================
    SHAAM-E-GAZAL — app.js
-   Dynamic YouTube Playlist Sync & Player UI
+   Dynamic YouTube Playlist Sync & Player UI (Mobile-Enhanced)
    ============================================================ */
 
 // ── ▼▼▼ SET YOUR YOUTUBE PLAYLIST ID HERE ▼▼▼ ───────────
@@ -14,7 +14,8 @@ var currentIndex  = 0;
 var isPlaying     = false;
 var seekInterval  = null;
 var tracklistOpen = false;
-var playlistTrackData = {}; // Cache metadata per index: { 0: { title, artist, id } }
+var isDraggingSeek = false;
+var playlistTrackData = {};
 
 // ── DOM refs ───────────────────────────────────────────────
 var vinyl          = document.getElementById('vinyl');
@@ -41,7 +42,6 @@ var tracklistCount = document.getElementById('tracklistCount');
 function parseVideoMetadata(title, author) {
   if (!title) return { title: 'Ghazal', artist: author || 'Shaam-e-Gazal' };
 
-  // Remove common YouTube clutter words
   var clean = title
     .replace(/[\(\[\{].*?[\)\]\}]/g, '')
     .replace(/\|\s*(Saregama|Tips|T-Series|Venus|Official|YRF|Sony).*$/i, '')
@@ -53,7 +53,6 @@ function parseVideoMetadata(title, author) {
     .replace(/hd video/gi, '')
     .trim();
 
-  // Split by hyphens or pipes if present: "Artist - Song" or "Song - Artist"
   var parts = clean.split(/[-|–—]/);
   if (parts.length >= 2) {
     var p1 = parts[0].trim();
@@ -109,10 +108,7 @@ function onPlayerReady() {
   console.log('[SEG] Player Ready! Syncing with YouTube Playlist...');
   playerReady = true;
 
-  // Build initial tracklist UI from YouTube's loaded playlist
   buildTracklistFromPlaylist();
-
-  // Sync UI with current video
   syncUIWithLivePlayer();
 }
 
@@ -160,7 +156,6 @@ function syncUIWithLivePlayer() {
       albumArt.src = 'https://i.ytimg.com/vi/' + data.video_id + '/mqdefault.jpg';
     }
 
-    // Cache metadata for tracklist updating
     playlistTrackData[idx] = {
       title: parsed.title,
       artist: parsed.artist,
@@ -290,9 +285,9 @@ function setPlaying(val) {
   }
 }
 
-// ── Seek ──────────────────────────────────────────────────
+// ── Seek & Touch Dragging ──────────────────────────────────
 function updateSeek() {
-  if (!playerReady) return;
+  if (!playerReady || isDraggingSeek) return;
   var dur = player.getDuration()    || 0;
   var cur = player.getCurrentTime() || 0;
   if (dur <= 0) return;
@@ -309,12 +304,23 @@ function fmtTime(s) {
   return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
-function seekTo(e) {
-  if (!playerReady) return;
+function getPctFromEvent(e) {
   var rect    = seekBar.getBoundingClientRect();
   var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-  var pct     = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+}
+
+function seekTo(e) {
+  if (!playerReady) return;
+  var pct = getPctFromEvent(e);
   player.seekTo(pct * (player.getDuration() || 0), true);
+  seekFill.style.width = (pct * 100) + '%';
+  seekThumb.style.left = (pct * 100) + '%';
+}
+
+function onSeekDrag(e) {
+  if (!playerReady) return;
+  var pct = getPctFromEvent(e);
   seekFill.style.width = (pct * 100) + '%';
   seekThumb.style.left = (pct * 100) + '%';
 }
@@ -389,14 +395,31 @@ playBtn.addEventListener('click', togglePlay);
 nextBtn.addEventListener('click', playNext);
 prevBtn.addEventListener('click', playPrev);
 listBtn.addEventListener('click', toggleTracklist);
+
 seekBar.addEventListener('click', seekTo);
-seekBar.addEventListener('touchstart', function(e) { e.preventDefault(); seekTo(e); }, { passive: false });
+seekBar.addEventListener('touchstart', function(e) {
+  isDraggingSeek = true;
+  seekTo(e);
+}, { passive: true });
+
+seekBar.addEventListener('touchmove', function(e) {
+  if (isDraggingSeek) onSeekDrag(e);
+}, { passive: true });
+
+seekBar.addEventListener('touchend', function(e) {
+  if (isDraggingSeek) {
+    isDraggingSeek = false;
+    seekTo(e);
+  }
+}, { passive: true });
+
 seekBar.addEventListener('keydown', function(e) {
   if (!playerReady) return;
   var dur = player.getDuration() || 0;
   if (e.key === 'ArrowRight') player.seekTo(Math.min(dur, player.getCurrentTime() + 5), true);
   if (e.key === 'ArrowLeft')  player.seekTo(Math.max(0, player.getCurrentTime() - 5), true);
 });
+
 document.addEventListener('click', function(e) {
   if (tracklistOpen && !tracklistPanel.contains(e.target) && e.target !== listBtn) toggleTracklist();
 });
@@ -405,4 +428,4 @@ document.addEventListener('click', function(e) {
 initDiyas();
 animateBars();
 
-console.log('[SEG] app.js initialized with Live Sync.');
+console.log('[SEG] Mobile-enhanced app.js ready.');
