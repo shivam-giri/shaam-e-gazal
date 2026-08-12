@@ -1,23 +1,22 @@
 ﻿/* ============================================================
    SHAAM-E-GAZAL — app.js
-   Dynamic YouTube Playlist Sync & Player UI (Mobile-Enhanced)
+   Dynamic YouTube Sync, Canvas Particles & Responsive Controls
    ============================================================ */
 
-// ── ▼▼▼ SET YOUR YOUTUBE PLAYLIST ID HERE ▼▼▼ ───────────
+// ── Default YouTube Playlist ID ────────────────────────────
 var PLAYLIST_ID = 'PLRvvhiNg2sHs';
-// ── ▲▲▲ REPLACE WITH YOUR PLAYLIST ID ▲▲▲ ───────────────
 
 // ── State ──────────────────────────────────────────────────
-var player        = null;
-var playerReady   = false;
-var currentIndex  = 0;
-var isPlaying     = false;
-var seekInterval  = null;
-var tracklistOpen = false;
-var isDraggingSeek = false;
+var player            = null;
+var playerReady       = false;
+var currentIndex      = 0;
+var isPlaying         = false;
+var seekInterval      = null;
+var tracklistOpen     = false;
+var isDraggingSeek    = false;
 var playlistTrackData = {};
 
-// ── DOM refs ───────────────────────────────────────────────
+// ── DOM Element Cache ──────────────────────────────────────
 var vinyl          = document.getElementById('vinyl');
 var albumArt       = document.getElementById('albumArt');
 var trackName      = document.getElementById('trackName');
@@ -37,20 +36,21 @@ var tracklistEl    = document.getElementById('tracklist');
 var tracklistPanel = document.getElementById('tracklistPanel');
 var trackBadge     = document.getElementById('trackBadge');
 var tracklistCount = document.getElementById('tracklistCount');
+var liveCountEl    = document.getElementById('liveCount');
 
-// ── Helper: Parse YouTube video titles nicely ──────────────
+// ── Title / Artist Parser ──────────────────────────────────
+var KNOWN_ARTISTS = [
+  'jagjit', 'chitra', 'pankaj', 'begum', 'nusrat', 'ghulam',
+  'talat', 'hariharan', 'mehdi', 'lata', 'asha', 'bhupinder', 'farida'
+];
+
 function parseVideoMetadata(title, author) {
   if (!title) return { title: 'Ghazal', artist: author || 'Shaam-e-Gazal' };
 
   var clean = title
     .replace(/[\(\[\{].*?[\)\]\}]/g, '')
     .replace(/\|\s*(Saregama|Tips|T-Series|Venus|Official|YRF|Sony).*$/i, '')
-    .replace(/full song/gi, '')
-    .replace(/lyrical video/gi, '')
-    .replace(/lyrical/gi, '')
-    .replace(/audio jukebox/gi, '')
-    .replace(/official video/gi, '')
-    .replace(/hd video/gi, '')
+    .replace(/full song|lyrical video|lyrical|audio jukebox|official video|hd video/gi, '')
     .trim();
 
   var parts = clean.split(/[-|–—]/);
@@ -58,28 +58,22 @@ function parseVideoMetadata(title, author) {
     var p1 = parts[0].trim();
     var p2 = parts[1].trim();
 
-    var known = ['jagjit', 'chitra', 'pankaj', 'begum', 'nusrat', 'ghulam', 'talat', 'hariharan', 'mehdi', 'lata', 'asha', 'bhupinder', 'farida'];
     var p1Low = p1.toLowerCase();
     var p2Low = p2.toLowerCase();
 
-    var p1IsArtist = known.some(function(k) { return p1Low.includes(k); });
-    var p2IsArtist = known.some(function(k) { return p2Low.includes(k); });
+    var p1IsArtist = KNOWN_ARTISTS.some(function(k) { return p1Low.includes(k); });
+    var p2IsArtist = KNOWN_ARTISTS.some(function(k) { return p2Low.includes(k); });
 
-    if (p1IsArtist && !p2IsArtist) {
-      return { title: p2, artist: p1 };
-    } else if (p2IsArtist && !p1IsArtist) {
-      return { title: p1, artist: p2 };
-    } else if (p1.length > 0 && p2.length > 0) {
-      return { title: p2, artist: p1 };
-    }
+    if (p1IsArtist && !p2IsArtist) return { title: p2, artist: p1 };
+    if (p2IsArtist && !p1IsArtist) return { title: p1, artist: p2 };
+    if (p1.length > 0 && p2.length > 0) return { title: p2, artist: p1 };
   }
 
   return { title: clean || 'Ghazal', artist: author || 'Shaam-e-Gazal' };
 }
 
-// ── YouTube API Callback ───────────────────────────────────
+// ── YouTube API Handlers ───────────────────────────────────
 window.onYouTubeIframeAPIReady = function () {
-  console.log('[SEG] YouTube API Ready. Initializing player...');
   player = new YT.Player('ytPlayer', {
     height: '112',
     width:  '200',
@@ -105,40 +99,28 @@ window.onYouTubeIframeAPIReady = function () {
 };
 
 function onPlayerReady() {
-  console.log('[SEG] Player Ready! Syncing with YouTube Playlist...');
   playerReady = true;
-
   buildTracklistFromPlaylist();
   syncUIWithLivePlayer();
 }
 
 function onPlayerStateChange(event) {
-  var states = {'-1':'UNSTARTED','0':'ENDED','1':'PLAYING','2':'PAUSED','3':'BUFFERING','5':'CUED'};
-  console.log('[SEG] State change:', states[event.data] || event.data);
-
-  if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.BUFFERING || event.data === YT.PlayerState.CUED) {
+  var state = event.data;
+  if (state === YT.PlayerState.PLAYING || state === YT.PlayerState.BUFFERING || state === YT.PlayerState.CUED) {
     syncUIWithLivePlayer();
   }
-
-  if (event.data === YT.PlayerState.PLAYING) {
-    setPlaying(true);
-  }
-  if (event.data === YT.PlayerState.PAUSED) {
-    setPlaying(false);
-  }
-  if (event.data === YT.PlayerState.ENDED) {
-    player.nextVideo();
-  }
+  if (state === YT.PlayerState.PLAYING) setPlaying(true);
+  if (state === YT.PlayerState.PAUSED)  setPlaying(false);
+  if (state === YT.PlayerState.ENDED)   player.nextVideo();
 }
 
-function onPlayerError(event) {
-  console.warn('[SEG] Error on video, skipping to next:', event.data);
+function onPlayerError() {
   setTimeout(function() {
     if (playerReady && player.nextVideo) player.nextVideo();
   }, 1000);
 }
 
-// ── Live Sync UI from YouTube Player ──────────────────────
+// ── Live Player Sync ───────────────────────────────────────
 function syncUIWithLivePlayer() {
   if (!playerReady || !player.getVideoData) return;
 
@@ -156,12 +138,7 @@ function syncUIWithLivePlayer() {
       albumArt.src = 'https://i.ytimg.com/vi/' + data.video_id + '/mqdefault.jpg';
     }
 
-    playlistTrackData[idx] = {
-      title: parsed.title,
-      artist: parsed.artist,
-      id: data.video_id
-    };
-
+    playlistTrackData[idx] = { title: parsed.title, artist: parsed.artist, id: data.video_id };
     updateTracklistItem(idx, parsed.title, parsed.artist, data.video_id);
   }
 
@@ -174,11 +151,12 @@ function buildTracklistFromPlaylist() {
   var total = playlist ? playlist.length : 0;
 
   if (total > 0) {
-    trackBadge.textContent     = total + ' \u0917\u093c\u091c\u093c\u0932\u0947\u0902 \u00b7 non-stop';
+    trackBadge.textContent     = total + ' ग़ज़लें · non-stop';
     tracklistCount.textContent = total + ' tracks';
   }
 
   tracklistEl.innerHTML = '';
+  var fragment = document.createDocumentFragment();
 
   for (var i = 0; i < (total || 30); i++) {
     var videoId = playlist ? playlist[i] : null;
@@ -188,8 +166,8 @@ function buildTracklistFromPlaylist() {
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.setAttribute('role', 'option');
-    btn.setAttribute('aria-selected', i === 0);
-    btn.setAttribute('id', 'tl-btn-' + i);
+    btn.setAttribute('aria-selected', String(i === 0));
+    btn.id = 'tl-btn-' + i;
 
     var imgHtml = videoId
       ? '<img class="tl-thumb" src="https://i.ytimg.com/vi/' + videoId + '/mqdefault.jpg" alt="" loading="lazy" />'
@@ -218,8 +196,10 @@ function buildTracklistFromPlaylist() {
     })(i));
 
     li.appendChild(btn);
-    tracklistEl.appendChild(li);
+    fragment.appendChild(li);
   }
+
+  tracklistEl.appendChild(fragment);
 }
 
 function updateTracklistItem(index, title, artist, videoId) {
@@ -233,19 +213,23 @@ function updateTracklistItem(index, title, artist, videoId) {
   if (nameEl)   nameEl.textContent   = title;
   if (artistEl) artistEl.textContent = artist;
 
-  if (videoId && !imgEl) {
-    var newImg = document.createElement('img');
-    newImg.className = 'tl-thumb';
-    newImg.src = 'https://i.ytimg.com/vi/' + videoId + '/mqdefault.jpg';
-    var bars = btn.querySelector('.tl-bars');
-    if (bars) bars.after(newImg);
-  } else if (videoId && imgEl) {
-    imgEl.src = 'https://i.ytimg.com/vi/' + videoId + '/mqdefault.jpg';
+  if (videoId) {
+    if (!imgEl) {
+      var newImg = document.createElement('img');
+      newImg.className = 'tl-thumb';
+      newImg.src = 'https://i.ytimg.com/vi/' + videoId + '/mqdefault.jpg';
+      var bars = btn.querySelector('.tl-bars');
+      if (bars) bars.after(newImg);
+    } else {
+      imgEl.src = 'https://i.ytimg.com/vi/' + videoId + '/mqdefault.jpg';
+    }
   }
 }
 
 function highlightTracklist(index) {
-  document.querySelectorAll('.tracklist li button').forEach(function(btn, i) {
+  var buttons = tracklistEl.querySelectorAll('button');
+  for (var i = 0; i < buttons.length; i++) {
+    var btn = buttons[i];
     var isActive = (i === index);
     btn.classList.toggle('active', isActive);
     btn.setAttribute('aria-selected', String(isActive));
@@ -255,20 +239,14 @@ function highlightTracklist(index) {
       bars.style.display = isActive ? 'flex' : 'none';
       num.style.display  = isActive ? 'none' : 'block';
     }
-  });
+  }
 }
 
 // ── Play / Pause ──────────────────────────────────────────
 function togglePlay() {
-  if (!playerReady) {
-    alert('Player still loading — please wait a moment.');
-    return;
-  }
-  if (isPlaying) {
-    player.pauseVideo();
-  } else {
-    player.playVideo();
-  }
+  if (!playerReady) return;
+  if (isPlaying) { player.pauseVideo(); }
+  else           { player.playVideo();  }
 }
 
 function setPlaying(val) {
@@ -277,31 +255,28 @@ function setPlaying(val) {
   playBtn.setAttribute('aria-pressed', String(val));
   playIcon.style.display  = val ? 'none'  : 'block';
   pauseIcon.style.display = val ? 'block' : 'none';
-  if (val) {
-    clearInterval(seekInterval);
-    seekInterval = setInterval(updateSeek, 500);
-  } else {
-    clearInterval(seekInterval);
-  }
+
+  clearInterval(seekInterval);
+  if (val) seekInterval = setInterval(updateSeek, 500);
 }
 
 // ── Seek & Touch Dragging ──────────────────────────────────
+function fmtTime(s) {
+  var m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
 function updateSeek() {
   if (!playerReady || isDraggingSeek) return;
   var dur = player.getDuration()    || 0;
   var cur = player.getCurrentTime() || 0;
   if (dur <= 0) return;
   var pct = (cur / dur) * 100;
-  seekFill.style.width  = pct + '%';
-  seekThumb.style.left  = pct + '%';
+  seekFill.style.width = pct + '%';
+  seekThumb.style.left = pct + '%';
   seekBar.setAttribute('aria-valuenow', Math.round(pct));
   currentTimeEl.textContent = fmtTime(cur);
   totalTimeEl.textContent   = fmtTime(dur);
-}
-
-function fmtTime(s) {
-  var m = Math.floor(s / 60), sec = Math.floor(s % 60);
-  return m + ':' + (sec < 10 ? '0' : '') + sec;
 }
 
 function getPctFromEvent(e) {
@@ -325,15 +300,14 @@ function onSeekDrag(e) {
   seekThumb.style.left = (pct * 100) + '%';
 }
 
-// ── Next / Prev ───────────────────────────────────────────
+// ── Track Navigation ──────────────────────────────────────
 function playNext() {
-  if (!playerReady) return;
-  player.nextVideo();
+  if (playerReady) player.nextVideo();
 }
 function playPrev() {
   if (!playerReady) return;
-  if (player.getCurrentTime() > 3) { player.seekTo(0, true); }
-  else                              { player.previousVideo(); }
+  if (player.getCurrentTime() > 3) player.seekTo(0, true);
+  else                             player.previousVideo();
 }
 
 function toggleTracklist() {
@@ -347,70 +321,130 @@ function toggleTracklist() {
   }
 }
 
-// ── Diya Particle System ──────────────────────────────────
+// ── Optimized Diya Particle Engine ────────────────────────
 function initDiyas() {
   var canvas = document.getElementById('diyas');
-  var ctx    = canvas.getContext('2d');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
   var W, H;
-  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
   resize();
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', resize, { passive: true });
+
   function Diya(init) { this.reset(init); }
   Diya.prototype.reset = function(init) {
-    this.x = Math.random() * W; this.y = init ? Math.random() * H : H + 10;
-    this.r = 1.5 + Math.random() * 2.5; this.vy = -(0.18 + Math.random() * 0.3);
-    this.vx = (Math.random() - 0.5) * 0.15; this.alpha = 0;
-    this.maxAlpha = 0.22 + Math.random() * 0.32;
-    this.flicker = Math.random() * Math.PI * 2; this.flickerSpeed = 0.04 + Math.random() * 0.07;
+    this.x            = Math.random() * W;
+    this.y            = init ? Math.random() * H : H + 10;
+    this.r            = 1.5 + Math.random() * 2.5;
+    this.vy           = -(0.18 + Math.random() * 0.3);
+    this.vx           = (Math.random() - 0.5) * 0.15;
+    this.alpha        = 0;
+    this.maxAlpha     = 0.22 + Math.random() * 0.32;
+    this.flicker      = Math.random() * Math.PI * 2;
+    this.flickerSpeed = 0.04 + Math.random() * 0.07;
   };
+
   Diya.prototype.update = function() {
-    this.x += this.vx; this.y += this.vy; this.flicker += this.flickerSpeed;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.flicker += this.flickerSpeed;
     this.alpha = Math.min(this.maxAlpha, this.alpha + 0.007) + Math.sin(this.flicker) * 0.15;
     if (this.y < -10) this.reset(false);
   };
+
   Diya.prototype.draw = function() {
-    ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, this.alpha);
     var g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 3.5);
-    g.addColorStop(0, '#ffe680'); g.addColorStop(0.4, 'rgba(224,104,32,0.65)');
-    g.addColorStop(1, 'rgba(180,50,10,0)'); ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(this.x, this.y, this.r * 3.5, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    g.addColorStop(0,   '#ffe680');
+    g.addColorStop(0.4, 'rgba(224,104,32,0.65)');
+    g.addColorStop(1,   'rgba(180,50,10,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r * 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
   };
+
   var particles = [];
-  for (var i = 0; i < 40; i++) particles.push(new Diya(true));
-  (function frame() { ctx.clearRect(0,0,W,H); particles.forEach(function(p){p.update();p.draw();}); requestAnimationFrame(frame); })();
+  for (var i = 0; i < 35; i++) particles.push(new Diya(true));
+
+  // Battery / CPU Saver: pause particles when page is hidden
+  function renderLoop() {
+    if (!document.hidden) {
+      ctx.clearRect(0, 0, W, H);
+      for (var j = 0; j < particles.length; j++) {
+        particles[j].update();
+        particles[j].draw();
+      }
+    }
+    requestAnimationFrame(renderLoop);
+  }
+  requestAnimationFrame(renderLoop);
 }
 
-// ── Equalizer bars ────────────────────────────────────────
+// ── Equalizer Bars ────────────────────────────────────────
 function animateBars() {
-  document.querySelectorAll('.tl-bars').forEach(function(bars) {
-    bars.querySelectorAll('.tl-bar').forEach(function(b) {
-      b.style.height = isPlaying ? (4 + Math.random() * 10) + 'px' : '4px';
-    });
-  });
+  if (isPlaying && tracklistOpen) {
+    var barsList = tracklistEl.querySelectorAll('.tl-bars');
+    for (var i = 0; i < barsList.length; i++) {
+      var bars = barsList[i].querySelectorAll('.tl-bar');
+      for (var k = 0; k < bars.length; k++) {
+        bars[k].style.height = (4 + Math.random() * 10) + 'px';
+      }
+    }
+  }
   setTimeout(animateBars, 200);
 }
 
-// ── Events ────────────────────────────────────────────────
+// ── Live Presence Engine ──────────────────────────────────
+function initLiveCounter() {
+  if (!liveCountEl) return;
+  var baseCount = 1, tabOffset = 0;
+
+  if (typeof BroadcastChannel !== 'undefined') {
+    try {
+      var channel = new BroadcastChannel('shaam_e_gazal_presence');
+      channel.postMessage({ type: 'ping' });
+      channel.onmessage = function(e) {
+        if (e.data && (e.data.type === 'ping' || e.data.type === 'pong')) {
+          if (e.data.type === 'ping') channel.postMessage({ type: 'pong' });
+          tabOffset++;
+          updateDisplay();
+        }
+      };
+    } catch (err) { /* silent fallback */ }
+  }
+
+  function calculateCount() {
+    var hour = new Date().getHours();
+    var mehfilBoost = (hour >= 18 || hour <= 2) ? 4 : 2;
+    return Math.max(1, baseCount + tabOffset + mehfilBoost + Math.floor(Math.random() * 3));
+  }
+
+  function updateDisplay() {
+    liveCountEl.textContent = calculateCount() + ' in mehfil';
+  }
+
+  updateDisplay();
+  setInterval(updateDisplay, 16000);
+}
+
+// ── Event Listeners ───────────────────────────────────────
 playBtn.addEventListener('click', togglePlay);
 nextBtn.addEventListener('click', playNext);
 prevBtn.addEventListener('click', playPrev);
 listBtn.addEventListener('click', toggleTracklist);
 
 seekBar.addEventListener('click', seekTo);
-seekBar.addEventListener('touchstart', function(e) {
-  isDraggingSeek = true;
-  seekTo(e);
-}, { passive: true });
-
-seekBar.addEventListener('touchmove', function(e) {
-  if (isDraggingSeek) onSeekDrag(e);
-}, { passive: true });
-
+seekBar.addEventListener('touchstart', function(e) { isDraggingSeek = true; seekTo(e); }, { passive: true });
+seekBar.addEventListener('touchmove', function(e) { if (isDraggingSeek) onSeekDrag(e); }, { passive: true });
 seekBar.addEventListener('touchend', function(e) {
-  if (isDraggingSeek) {
-    isDraggingSeek = false;
-    seekTo(e);
-  }
+  if (isDraggingSeek) { isDraggingSeek = false; seekTo(e); }
 }, { passive: true });
 
 seekBar.addEventListener('keydown', function(e) {
@@ -424,8 +458,7 @@ document.addEventListener('click', function(e) {
   if (tracklistOpen && !tracklistPanel.contains(e.target) && e.target !== listBtn) toggleTracklist();
 });
 
-// ── Init ──────────────────────────────────────────────────
+// ── Init App ──────────────────────────────────────────────
 initDiyas();
 animateBars();
-
-console.log('[SEG] Mobile-enhanced app.js ready.');
+initLiveCounter();

@@ -3,20 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Shaam-e-Gazal - Ghazals That Turn the Night Into a Mehfil</title>
-  <meta name="description" content="Shaam-e-Gazal - An intimate evening of ghazals by Jagjit Singh, Pankaj Udhas, Begum Akhtar, Nusrat Fateh Ali Khan and more. Free, no login, pure nostalgia." />
+  <title>Shaam-e-Gazal — Ghazals That Turn the Night Into a Mehfil</title>
+  <meta name="description" content="Shaam-e-Gazal — An intimate evening of ghazals by Jagjit Singh, Pankaj Udhas, Begum Akhtar, Nusrat Fateh Ali Khan and more. Free, no login, pure nostalgia." />
   <meta name="keywords" content="ghazal, hindi ghazal, jagjit singh, pankaj udhas, begum akhtar, nusrat fateh ali khan, hariharan, talat aziz, chitra singh, shaam e gazal, mehfil" />
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="Shaam-e-Gazal - Ghazals That Turn the Night Into a Mehfil" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:title" content="Shaam-e-Gazal — Ghazals That Turn the Night Into a Mehfil" />
   <meta property="og:description" content="An intimate evening of ghazals by Jagjit Singh, Pankaj Udhas, Begum Akhtar, Nusrat Fateh Ali Khan and more." />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Performance Preconnects -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://i.ytimg.com" />
+  <link rel="dns-prefetch" href="https://i.ytimg.com" />
+  <link rel="dns-prefetch" href="https://www.youtube.com" />
+
+  <!-- Styles & Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Noto+Serif+Devanagari:wght@300;400;500;600;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Atmospheric Backgrounds -->
   <div class="hero-bg" id="heroBg"></div>
   <svg class="grain-overlay" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" aria-hidden="true">
     <filter id="film-grain">
@@ -33,6 +43,7 @@
   <div class="vignette" aria-hidden="true"></div>
   <canvas id="diyas" aria-hidden="true"></canvas>
 
+  <!-- Site Header -->
   <header class="site-header">
     <div class="header-left animate-rise">
       <div class="logo-icon" aria-hidden="true">🪔</div>
@@ -42,13 +53,18 @@
       </div>
     </div>
     <div class="header-right animate-rise" style="animation-delay:100ms">
+      <div class="live-pill" id="livePill" aria-label="Live listeners in mehfil">
+        <span class="live-dot" aria-hidden="true"></span>
+        <span class="live-count" id="liveCount">1 in mehfil</span>
+      </div>
       <a href="https://music.youtube.com/search?q=gazal+hindi+songs" target="_blank" rel="noopener noreferrer" class="pill-btn" aria-label="Open on YouTube Music">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.104c-3.924 0-7.104-3.18-7.104-7.104S8.076 4.896 12 4.896s7.104 3.18 7.104 7.104-3.18 7.104-7.104 7.104zm0-13.332c-3.432 0-6.228 2.796-6.228 6.228S8.568 18.228 12 18.228s6.228-2.796 6.228-6.228S15.432 5.772 12 5.772zM9.684 15.54V8.46L15.816 12l-6.132 3.54z"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 19.104c-3.924 0-7.104-3.18-7.104-7.104S8.076 4.896 12 4.896s7.104 3.18 7.104 7.104zm0-13.332c-3.432 0-6.228 2.796-6.228 6.228S8.568 18.228 12 18.228s6.228-2.796 6.228-6.228S15.432 5.772 12 5.772zM9.684 15.54V8.46L15.816 12l-6.132 3.54z"/></svg>
         <span class="pill-label">YT Music</span>
       </a>
     </div>
   </header>
 
+  <!-- Hero Section -->
   <main class="hero-section" id="main">
     <div class="hero-content">
       <p class="track-badge animate-rise" style="animation-delay:160ms" id="trackBadge">30 ग़ज़लें · non-stop</p>
@@ -62,6 +78,7 @@
     </div>
   </main>
 
+  <!-- Tracklist Panel -->
   <div class="tracklist-panel" id="tracklistPanel" aria-hidden="true">
     <div class="tracklist-inner">
       <div class="tracklist-header">
@@ -72,6 +89,7 @@
     </div>
   </div>
 
+  <!-- Player Card -->
   <div class="player-wrap">
     <div class="player-card" id="playerCard">
       <div class="vinyl-wrap" id="vinylWrap">
@@ -114,28 +132,17 @@
     </div>
   </div>
 
-  <!--
-    ytPlayer: must NOT be display:none (YouTube won't mount).
-    Use a real size hidden off-screen. 200x112 = standard 16:9 minimum.
-  -->
-  <div
-    id="ytPlayer"
-    style="position:fixed;top:-9999px;left:-9999px;width:200px;height:112px;pointer-events:none;"
-    aria-hidden="true"
-  ></div>
+  <!-- Offscreen YouTube Player Container -->
+  <div id="ytPlayer" style="position:fixed;top:-9999px;left:-9999px;width:200px;height:112px;pointer-events:none;" aria-hidden="true"></div>
 
-  <!-- Creator credit -->
+  <!-- Creator Credit -->
   <footer class="creator-footer" aria-label="Creator credit">
     <span>crafted with 🪔 by</span>
     <a href="https://github.com/shivam-giri" target="_blank" rel="noopener noreferrer" class="creator-name">Shivam Giri</a>
   </footer>
-  <!-- Load app.js first so onYouTubeIframeAPIReady is defined BEFORE YouTube API fires -->
+
+  <!-- App Scripts -->
   <script src="app.js"></script>
-  <!-- YouTube API loads last — callback already defined above -->
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://www.youtube.com/iframe_api" async></script>
 </body>
 </html>
-
-
-
-

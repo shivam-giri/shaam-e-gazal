@@ -1,10 +1,9 @@
 ﻿/* ============================================================
    SHAAM-E-GAZAL — style.css
-   A candlelit mehfil for ghazal lovers
-   Mobile-First & Fully Responsive Design System
+   Optimized Design System & Responsive Layout
    ============================================================ */
 
-/* ── Root Tokens ─────────────────────────────────────────── */
+/* ── 1. Root Tokens & Variables ──────────────────────────── */
 :root {
   --dusk:        #100806;
   --dusk-mid:    #1a0d07;
@@ -30,7 +29,7 @@
   --safe-right:  env(safe-area-inset-right, 0px);
 }
 
-/* ── Reset & Base ────────────────────────────────────────── */
+/* ── 2. Reset & Base ─────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -46,7 +45,7 @@ html {
 }
 
 body {
-  min-height: 100%;
+  min-height: 100vh;
   min-height: 100dvh;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--dusk);
@@ -55,7 +54,7 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* ── Background & Atmospheric Layers ─────────────────────── */
+/* ── 3. Background Layers ────────────────────────────────── */
 .hero-bg {
   position: fixed; inset: 0; z-index: -30;
   background: url('new-bg.png') center center / cover no-repeat;
@@ -78,13 +77,12 @@ body {
     linear-gradient(to top,    rgba(10,4,1,0.92) 0%, rgba(10,4,1,0.35) 30%, rgba(10,4,1,0) 60%);
 }
 
-/* ── Diya Particle Canvas ────────────────────────────────── */
 #diyas {
   position: fixed; inset: 0; z-index: -15;
   pointer-events: none;
 }
 
-/* ── Keyframes ───────────────────────────────────────────── */
+/* ── 4. Animations ───────────────────────────────────────── */
 @keyframes rise {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -92,22 +90,25 @@ body {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+@keyframes pulse-green {
+  0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 6px #4ade80; }
+  50% { transform: scale(1.25); opacity: 0.5; box-shadow: 0 0 12px #4ade80; }
+}
 
 .animate-rise {
   opacity: 0;
   animation: rise 0.7s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
-/* ── Header ──────────────────────────────────────────────── */
+/* ── 5. Site Header & Live Badge ─────────────────────────── */
 .site-header {
   position: fixed;
-  inset-inline: 0;
-  top: 0;
+  inset-inline: 0; top: 0;
   z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   padding: calc(14px + var(--safe-top)) calc(16px + var(--safe-right)) 12px calc(16px + var(--safe-left));
   pointer-events: none;
 }
@@ -155,6 +156,34 @@ body {
   gap: 8px;
 }
 
+/* Live Badge */
+.live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--white-90);
+  background: rgba(200, 146, 42, 0.15);
+  border: 1px solid rgba(200, 146, 42, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  white-space: nowrap;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 8px #4ade80;
+  animation: pulse-green 2s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+/* Pill Button */
 .pill-btn {
   display: inline-flex;
   align-items: center;
@@ -184,7 +213,7 @@ body {
   .site-header { padding-inline: calc(24px + var(--safe-right)); }
 }
 
-/* ── Hero Section ────────────────────────────────────────── */
+/* ── 6. Hero Section ─────────────────────────────────────── */
 .hero-section {
   position: relative;
   min-height: 100vh;
@@ -201,9 +230,10 @@ body {
   align-items: center;
   text-align: center;
   position: relative;
+  width: 100%;
+  max-width: 720px;
 }
 
-/* Radial glow behind text */
 .hero-content::before {
   content: '';
   position: absolute;
@@ -276,7 +306,7 @@ body {
   text-shadow: 0 1px 10px rgba(10,4,1,0.8);
 }
 
-/* ── Tracklist Panel ─────────────────────────────────────── */
+/* ── 7. Tracklist Drawer ─────────────────────────────────── */
 .tracklist-panel {
   position: fixed;
   inset-inline: 0;
@@ -342,9 +372,6 @@ body {
   scrollbar-color: var(--white-10) transparent;
   -webkit-overflow-scrolling: touch;
 }
-.tracklist::-webkit-scrollbar { width: 4px; }
-.tracklist::-webkit-scrollbar-track { background: transparent; }
-.tracklist::-webkit-scrollbar-thumb { background: var(--white-20); border-radius: 4px; }
 
 .tracklist li button {
   width: 100%;
@@ -364,9 +391,7 @@ body {
 }
 .tracklist li button:hover { background: var(--white-08); }
 .tracklist li button:active { background: rgba(200,146,42,0.18); }
-.tracklist li button.active {
-  background: rgba(200,146,42,0.14);
-}
+.tracklist li button.active { background: rgba(200,146,42,0.14); }
 
 .tl-num {
   width: 22px;
@@ -410,7 +435,6 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 0.2s;
 }
 .tl-artist {
   display: block;
@@ -423,11 +447,10 @@ body {
 }
 button.active .tl-name { color: var(--amber-soft); }
 
-/* ── Player Fixed Wrapper ────────────────────────────────── */
+/* ── 8. Player Controls & Vinyl ─────────────────────────── */
 .player-wrap {
   position: fixed;
-  inset-inline: 0;
-  bottom: 0;
+  inset-inline: 0; bottom: 0;
   z-index: 25;
   display: flex;
   justify-content: center;
@@ -453,7 +476,6 @@ button.active .tl-name { color: var(--amber-soft); }
     inset 0 1px 0 rgba(255,240,210,0.08);
 }
 
-/* ── Vinyl Artwork ───────────────────────────────────────── */
 .vinyl-wrap {
   flex-shrink: 0;
   width: 56px; height: 56px;
@@ -485,7 +507,6 @@ button.active .tl-name { color: var(--amber-soft); }
   transform: translate(-50%,-50%);
 }
 
-/* ── Track Info & Seek Bar ───────────────────────────────── */
 .track-info {
   flex: 1;
   min-width: 0;
@@ -542,7 +563,7 @@ button.active .tl-name { color: var(--amber-soft); }
   border-radius: 50%;
   background: var(--gold);
   box-shadow: 0 0 6px var(--ember-glow);
-  opacity: 0.85; /* Visible for mobile touch feedback */
+  opacity: 0.85;
   transition: opacity 0.15s, left 0.25s linear;
   pointer-events: none;
 }
@@ -558,7 +579,6 @@ button.active .tl-name { color: var(--amber-soft); }
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Player Controls ─────────────────────────────────────── */
 .controls {
   display: flex;
   align-items: center;
@@ -592,21 +612,7 @@ button.active .tl-name { color: var(--amber-soft); }
 
 .list-btn { margin-left: 1px; }
 
-/* ── Larger Screen Tweaks (Desktop & Tablet >= 520px) ───── */
-@media (min-width: 520px) {
-  :root {
-    --player-h: 136px;
-  }
-  .vinyl-wrap { width: 68px; height: 68px; }
-  .player-card { padding: 12px 16px; gap: 14px; border-radius: 24px; }
-  .track-name { font-size: 14px; }
-  .track-artist { font-size: 12px; }
-  .controls { gap: 4px; }
-  .ctrl-btn.sm { width: 38px; height: 38px; }
-  .ctrl-btn.lg { width: 48px; height: 48px; }
-}
-
-/* ── Creator Footer ──────────────────────────────────────── */
+/* ── 9. Creator Footer ───────────────────────────────────── */
 .creator-footer {
   position: fixed;
   bottom: calc(var(--player-h) + 2px + var(--safe-bottom));
@@ -637,13 +643,24 @@ button.active .tl-name { color: var(--amber-soft); }
   opacity: 1;
 }
 
-/* Hide creator footer when tracklist is open on small mobile screens */
 .tracklist-panel.open ~ .creator-footer {
   opacity: 0;
   pointer-events: none;
 }
 
-/* ── Focus & Global Scrollbar ────────────────────────────── */
+/* ── 10. Media Queries ───────────────────────────────────── */
+@media (min-width: 520px) {
+  :root { --player-h: 136px; }
+  .vinyl-wrap { width: 68px; height: 68px; }
+  .player-card { padding: 12px 16px; gap: 14px; border-radius: 24px; }
+  .track-name { font-size: 14px; }
+  .track-artist { font-size: 12px; }
+  .controls { gap: 4px; }
+  .ctrl-btn.sm { width: 38px; height: 38px; }
+  .ctrl-btn.lg { width: 48px; height: 48px; }
+}
+
+/* ── Global Scrollbar & Focus ────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--amber);
   outline-offset: 2px;

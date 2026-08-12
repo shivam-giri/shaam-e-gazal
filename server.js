@@ -1,54 +1,68 @@
-﻿// Simple local dev server for Shaam-e-Gazal
-// Run: node server.js  →  open http://localhost:3000
+﻿/* ============================================================
+   SHAAM-E-GAZAL — server.js
+   Lightweight Local HTTP Development Server
+   Run: node server.js -> Open http://localhost:3000
+   ============================================================ */
 
 const http = require('http');
 const fs   = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 
 const PORT = 3000;
 const DIR  = __dirname;
 
-const MIME = {
+const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
-  '.css':  'text/css',
-  '.js':   'application/javascript',
+  '.css':  'text/css; charset=utf-8',
+  '.js':   'application/javascript; charset=utf-8',
   '.jpg':  'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.png':  'image/png',
   '.svg':  'image/svg+xml',
   '.ico':  'image/x-icon',
-  '.md':   'text/markdown',
+  '.json': 'application/json; charset=utf-8',
+  '.toml': 'text/plain; charset=utf-8',
+  '.md':   'text/markdown; charset=utf-8',
 };
 
-const server = http.createServer(function(req, res) {
-  let urlPath = req.url === '/' ? '/index.html' : req.url;
-  // Strip query strings
-  urlPath = urlPath.split('?')[0];
+const server = http.createServer((req, res) => {
+  let urlPath = req.url === '/' ? '/index.html' : req.url.split('?')[0];
+  const filePath = path.join(DIR, path.normalize(urlPath));
 
-  const filePath = path.join(DIR, urlPath);
-  const ext      = path.extname(filePath).toLowerCase();
+  // Security check: prevent directory traversal
+  if (!filePath.startsWith(DIR)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain' });
+    res.end('403 Forbidden');
+    return;
+  }
 
-  fs.readFile(filePath, function(err, data) {
+  const ext = path.extname(filePath).toLowerCase();
+  const mime = MIME_TYPES[ext] || 'application/octet-stream';
+
+  fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 Not Found: ' + urlPath);
+      if (err.code === 'ENOENT') {
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end('<h1>404 Not Found</h1><p>Requested path: ' + urlPath + '</p>');
+      } else {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('500 Internal Server Error');
+      }
       return;
     }
-    res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+
+    res.writeHead(200, {
+      'Content-Type': mime,
+      'Cache-Control': 'no-cache',
+      'X-Content-Type-Options': 'nosniff',
+    });
     res.end(data);
   });
 });
 
-server.listen(PORT, function() {
-  console.log('');
-  console.log('  \uD83E\uDE94  Shaam-e-Gazal is live!');
-  console.log('');
-  console.log('  \u25B6  Open in browser:  http://localhost:' + PORT);
-  console.log('');
-  console.log('  Press Ctrl+C to stop the server.');
-  console.log('');
-
-  // Try to auto-open browser on Windows
-  const { exec } = require('child_process');
+server.listen(PORT, () => {
+  console.log('\n  🪔  Shaam-e-Gazal is live!');
+  console.log('  ▶  Open in browser: http://localhost:' + PORT + '\n');
   exec('start http://localhost:' + PORT);
 });
