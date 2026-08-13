@@ -669,3 +669,16 @@ button.active .tl-name { color: var(--amber-soft); }
 * { scrollbar-width: thin; scrollbar-color: var(--white-10) transparent; }
 *::-webkit-scrollbar { width: 4px; height: 4px; }
 *::-webkit-scrollbar-thumb { background: var(--white-20); border-radius: 4px; }
+
+/* ── Accessible SEO Hidden Content ──────────────────────── */
+.sr-only-seo {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
