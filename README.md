@@ -1,5 +1,7 @@
 ﻿# 🪔 शाम-ए-ग़ज़ल — Shaam-e-Gazal
 
+Live Url: https://sham-e-gazal.netlify.app
+
 > *ग़ज़लें जो रात को महफ़िल बना दें*
 > Ghazals that turn the night into a mehfil.
 
@@ -9,7 +11,7 @@ A single-page immersive ghazal music player — inspired by [saloon.wtf](https:/
 
 ## ✨ Features
 
-- 🎵 **30 ghazals** — streamed via YouTube IFrame API, no login required
+- 🎵 **50 ghazals** — streamed via YouTube IFrame API, no login required
 - 💿 **Spinning vinyl** — rotates while playing, pauses when music pauses
 - 📜 **Glassmorphic tracklist** — slides up with animated equalizer bars
 - 🪔 **Diya particle system** — floating warm ember glows across the screen
@@ -17,24 +19,6 @@ A single-page immersive ghazal music player — inspired by [saloon.wtf](https:/
 - 🌅 **AI-generated mehfil background** — candlelit Mughal gathering at dusk
 - 🎚️ **Seek bar** — click to seek, keyboard arrows skip ±5 seconds
 - 📱 **Fully responsive** — works on mobile and desktop
-
----
-
-## 🎤 Artists
-
-| Artist | Known For |
-|--------|-----------|
-| **Jagjit Singh** | Hoshwalon Ko Khabar Kya, Woh Kagaz Ki Kashti |
-| **Chitra Singh** | Tum Ko Dekha To Yeh Khayal Aaya |
-| **Nusrat Fateh Ali Khan** | Afreen Afreen, Sanu Ek Pal Chain |
-| **Ghulam Ali** | Yeh Dil Yeh Pagal Dil, Hungama Hai Kyon Barpa |
-| **Pankaj Udhas** | Na Kajre Ki Dhar, Chandi Jaisa Rang |
-| **Begum Akhtar** | Ae Mohabbat Tere Anjam Pe |
-| **Talat Aziz** | Zindagi Jab Bhi Teri Bazm Mein |
-| **Hariharan** | Har Taraf Aaj |
-| **Mehdi Hassan** | Ranjish Hi Sahi, Patta Patta Boota Boota |
-| **Farida Khanum** | Aaj Jaane Ki Zid Na Karo |
-| **Lata Mangeshkar** | Phir Chhidi Raat, Dil Dhundta Hai |
 
 ---
 
@@ -119,4 +103,3 @@ Made with 🪔 by **[Shivam Giri](https://github.com/shivam-giri)**
 ## 📄 License
 
 MIT — free to use, remix, and share. A mehfil is for everyone. 🪔
-
