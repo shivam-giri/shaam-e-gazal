@@ -1,0 +1,29 @@
+﻿# Robots.txt for Shaam-e-Gazal
+# Explicitly allowing all search engine and AI web crawlers
+
+User-agent: *
+Allow: /
+
+# Allow AI & LLM Search Crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: https://sham-e-gazal.netlify.app/sitemap.xml
